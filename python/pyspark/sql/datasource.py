@@ -720,6 +720,9 @@ class DataSourceStreamReader(ABC):
         """
         Returns the most recent offset available, optionally capped by a read limit.
 
+        .. versionchanged:: 4.0.0
+           Added `start_offset` and `read_limit` parameters for admission control support.
+
         This method supports admission control for streaming sources. When `read_limit` is provided,
         the source should return a capped offset that respects the configured batch size limits.
 
@@ -837,9 +840,6 @@ class DataSourceStreamReader(ABC):
         --------
         reportLatestOffset : Report the true latest available offset for monitoring
         partitions : Plan partitions between start and end offsets
-
-        .. versionchanged:: 4.0.0
-           Added `start_offset` and `read_limit` parameters for admission control support.
         """
         raise PySparkNotImplementedError(
             errorClass="NOT_IMPLEMENTED",
