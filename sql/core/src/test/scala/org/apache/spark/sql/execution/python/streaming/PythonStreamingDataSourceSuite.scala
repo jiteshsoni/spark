@@ -200,7 +200,8 @@ class PythonStreamingDataSourceSimpleSuite extends PythonDataSourceSuiteBase {
           // Remove the last entry of commit log to test replaying microbatch during restart.
           val offsetLog =
             new OffsetSeqLog(spark, new File(checkpointDir, "offsets").getCanonicalPath)
-          val commitLog = new CommitLog(spark, new File(checkpointDir, "commits").getCanonicalPath)
+          val commitLog =
+            new CommitLog(spark, new File(checkpointDir, "commits").getCanonicalPath)
           commitLog.purgeAfter(offsetLog.getLatest().get._1 - 1)
         }
 
@@ -223,8 +224,7 @@ class PythonStreamingDataSourceSimpleSuite extends PythonDataSourceSuiteBase {
       assert(rowCount == 2 * (lastBatchId + 1) || rowCount == 2 * (lastBatchId + 2))
       checkAnswer(
         spark.read.format("json").load(outputDir.getAbsolutePath),
-        (0 until rowCount.toInt).map(Row(_))
-      )
+        (0 until rowCount.toInt).map(Row(_)))
     }
   }
 
@@ -255,28 +255,22 @@ class PythonStreamingDataSourceSimpleSuite extends PythonDataSourceSuiteBase {
         pythonDs,
         errorDataSourceName,
         inputSchema,
-        CaseInsensitiveStringMap.empty()
-      )
+        CaseInsensitiveStringMap.empty())
       val err = intercept[SparkException] {
         func(stream)
       }
       checkErrorMatchPVals(
         err,
         condition = "PYTHON_STREAMING_DATA_SOURCE_RUNTIME_ERROR",
-        parameters = Map(
-          "action" -> action,
-          "msg" -> "(.|\\n)*"
-        )
-      )
+        parameters = Map("action" -> action, "msg" -> "(.|\\n)*"))
       assert(err.getMessage.contains(msg))
       stream.stop()
     }
 
     testMicroBatchStreamError(
       "initialOffset",
-      "[NOT_IMPLEMENTED] initialOffset is not implemented") {
-      stream =>
-        stream.initialOffset()
+      "[NOT_IMPLEMENTED] initialOffset is not implemented") { stream =>
+      stream.initialOffset()
     }
 
     // User don't need to implement latestOffset for SimpleDataSourceStreamReader.
@@ -284,9 +278,8 @@ class PythonStreamingDataSourceSimpleSuite extends PythonDataSourceSuiteBase {
     // So the not implemented method is initialOffset.
     testMicroBatchStreamError(
       "latestOffset",
-      "[NOT_IMPLEMENTED] initialOffset is not implemented") {
-      stream =>
-        stream.latestOffset()
+      "[NOT_IMPLEMENTED] initialOffset is not implemented") { stream =>
+      stream.latestOffset()
     }
   }
 
@@ -320,25 +313,21 @@ class PythonStreamingDataSourceSimpleSuite extends PythonDataSourceSuiteBase {
         pythonDs,
         errorDataSourceName,
         inputSchema,
-        CaseInsensitiveStringMap.empty()
-      )
+        CaseInsensitiveStringMap.empty())
       val err = intercept[SparkException] {
         func(stream)
       }
       checkErrorMatchPVals(
         err,
         condition = "PYTHON_STREAMING_DATA_SOURCE_RUNTIME_ERROR",
-        parameters = Map(
-          "action" -> action,
-          "msg" -> "(.|\\n)*"
-        )
-      )
+        parameters = Map("action" -> action, "msg" -> "(.|\\n)*"))
       assert(err.getMessage.contains(msg))
       stream.stop()
     }
 
-    testMicroBatchStreamError("latestOffset", "Exception: error reading available data") { stream =>
-      stream.latestOffset()
+    testMicroBatchStreamError("latestOffset", "Exception: error reading available data") {
+      stream =>
+        stream.latestOffset()
     }
   }
 }
@@ -409,8 +398,7 @@ class PythonStreamingDataSourceSuite extends PythonDataSourceSuiteBase {
       pythonDs,
       dataSourceName,
       inputSchema,
-      CaseInsensitiveStringMap.empty()
-    )
+      CaseInsensitiveStringMap.empty())
 
     var startOffset = stream.initialOffset()
     assert(startOffset.json == "{\"offset\": {\"partition-1\": 0}}")
@@ -656,38 +644,34 @@ class PythonStreamingDataSourceSuite extends PythonDataSourceSuiteBase {
         pythonDs,
         errorDataSourceName,
         inputSchema,
-        CaseInsensitiveStringMap.empty()
-      )
+        CaseInsensitiveStringMap.empty())
       val err = intercept[SparkException] {
         func(stream)
       }
       checkErrorMatchPVals(
         err,
         condition = "PYTHON_STREAMING_DATA_SOURCE_RUNTIME_ERROR",
-        parameters = Map(
-          "action" -> action,
-          "msg" -> "(.|\\n)*"
-        )
-      )
+        parameters = Map("action" -> action, "msg" -> "(.|\\n)*"))
       assert(err.getMessage.contains(msg))
       stream.stop()
     }
 
     testMicroBatchStreamError(
       "initialOffset",
-      "[NOT_IMPLEMENTED] initialOffset is not implemented") {
-      stream =>
-        stream.initialOffset()
+      "[NOT_IMPLEMENTED] initialOffset is not implemented") { stream =>
+      stream.initialOffset()
     }
 
     val offset = PythonStreamingSourceOffset("{\"offset\": \"2\"}")
-    testMicroBatchStreamError("latestOffset", "[NOT_IMPLEMENTED] latestOffset is not implemented") {
-      stream =>
-        stream.latestOffset(offset, ReadLimit.allAvailable())
+    testMicroBatchStreamError(
+      "latestOffset",
+      "[NOT_IMPLEMENTED] latestOffset is not implemented") { stream =>
+      stream.latestOffset(offset, ReadLimit.allAvailable())
     }
-    testMicroBatchStreamError("planPartitions", "[NOT_IMPLEMENTED] partitions is not implemented") {
-      stream =>
-        stream.planInputPartitions(offset, offset)
+    testMicroBatchStreamError(
+      "planPartitions",
+      "[NOT_IMPLEMENTED] partitions is not implemented") { stream =>
+      stream.planInputPartitions(offset, offset)
     }
   }
 
@@ -716,19 +700,14 @@ class PythonStreamingDataSourceSuite extends PythonDataSourceSuiteBase {
         pythonDs,
         errorDataSourceName,
         inputSchema,
-        CaseInsensitiveStringMap.empty()
-      )
+        CaseInsensitiveStringMap.empty())
       val err = intercept[SparkException] {
         func(stream)
       }
       checkErrorMatchPVals(
         err,
         condition = "PYTHON_STREAMING_DATA_SOURCE_RUNTIME_ERROR",
-        parameters = Map(
-          "action" -> action,
-          "msg" -> "(.|\\n)*"
-        )
-      )
+        parameters = Map("action" -> action, "msg" -> "(.|\\n)*"))
       assert(err.getMessage.contains(msg))
       stream.stop()
     }
@@ -808,13 +787,15 @@ class PythonStreamingDataSourceWriteSuite extends PythonDataSourceSuiteBase {
           inputData.toDF()
         } else {
           // Complete mode only supports stateful aggregation
-          inputData.toDF()
-            .groupBy("value").count()
+          inputData
+            .toDF()
+            .groupBy("value")
+            .count()
         }
-        def resultDf: DataFrame = spark.read.format("json")
+        def resultDf: DataFrame = spark.read
+          .format("json")
           .load(outputDir.getAbsolutePath)
-        val q = streamDF
-          .writeStream
+        val q = streamDF.writeStream
           .format(dataSourceName)
           .outputMode(mode)
           .option("checkpointLocation", checkpointDir.getAbsolutePath)
@@ -823,22 +804,16 @@ class PythonStreamingDataSourceWriteSuite extends PythonDataSourceSuiteBase {
         inputData.addData(1, 2, 3)
         eventually(timeout(waitTimeout)) {
           if (mode == "append") {
-            checkAnswer(
-              resultDf,
-              Seq(Row(1), Row(2), Row(3)))
+            checkAnswer(resultDf, Seq(Row(1), Row(2), Row(3)))
           } else {
-            checkAnswer(
-              resultDf.select("value", "count"),
-              Seq(Row(1, 1), Row(2, 1), Row(3, 1)))
+            checkAnswer(resultDf.select("value", "count"), Seq(Row(1, 1), Row(2, 1), Row(3, 1)))
           }
         }
 
         inputData.addData(1, 4)
         eventually(timeout(waitTimeout)) {
           if (mode == "append") {
-            checkAnswer(
-              resultDf,
-              Seq(Row(1), Row(2), Row(3), Row(4), Row(1)))
+            checkAnswer(resultDf, Seq(Row(1), Row(2), Row(3), Row(4), Row(1)))
           } else {
             checkAnswer(
               resultDf.select("value", "count"),
@@ -867,13 +842,13 @@ class PythonStreamingDataSourceWriteSuite extends PythonDataSourceSuiteBase {
       checkpointDir.mkdir()
       val outputDir = new File(path, "output")
       outputDir.mkdir()
-      val q = df
-        .writeStream
+      val q = df.writeStream
         .format(dataSourceName)
         .option("checkpointLocation", checkpointDir.getAbsolutePath)
         .trigger(ProcessingTimeTrigger(20 * 1000))
         .start(outputDir.getAbsolutePath)
-      def resultDf: DataFrame = spark.read.format("json")
+      def resultDf: DataFrame = spark.read
+        .format("json")
         .load(outputDir.getAbsolutePath)
 
       inputData.addData(1 to 3)
@@ -950,14 +925,16 @@ class PythonStreamingDataSourceWriteSuite extends PythonDataSourceSuiteBase {
       checkpointDir.mkdir()
       val outputDir = new File(path, "output")
       outputDir.mkdir()
-      val q = inputData.toDF()
+      val q = inputData
+        .toDF()
         .writeStream
         .format(dataSourceName)
         .outputMode("append")
         .option("checkpointLocation", checkpointDir.getAbsolutePath)
         .start(outputDir.getAbsolutePath)
 
-      def metadataDf: DataFrame = spark.read.format("json")
+      def metadataDf: DataFrame = spark.read
+        .format("json")
         .load(outputDir.getAbsolutePath)
 
       // Batch 0-2 should succeed and json commit files are written.
@@ -997,7 +974,8 @@ class PythonStreamingDataSourceWriteSuite extends PythonDataSourceSuiteBase {
     // the output directory in commit() function. If aborting a microbatch, it writes
     // batchId.txt into output directory.
 
-    val dataSource = createUserDefinedPythonDataSource(dataSourceName, simpleDataStreamWriterScript)
+    val dataSource =
+      createUserDefinedPythonDataSource(dataSourceName, simpleDataStreamWriterScript)
     spark.dataSource.registerPython(dataSourceName, dataSource)
 
     withTempDir { dir =>
@@ -1015,7 +993,8 @@ class PythonStreamingDataSourceWriteSuite extends PythonDataSourceSuiteBase {
           checkpointDir.mkdir()
           val outputDir = new File(path, "output")
           outputDir.mkdir()
-          val q = inputData.toDF()
+          val q = inputData
+            .toDF()
             .writeStream
             .format(dataSourceName)
             .outputMode(mode)
@@ -1036,9 +1015,7 @@ class PythonStreamingDataSourceWriteSuite extends PythonDataSourceSuiteBase {
         },
         condition = "STREAMING_OUTPUT_MODE.UNSUPPORTED_OPERATION",
         sqlState = "42KDE",
-        parameters = Map(
-          "outputMode" -> "complete",
-          "operation" -> "no streaming aggregations"))
+        parameters = Map("outputMode" -> "complete", "operation" -> "no streaming aggregations"))
 
       // Query should fail in planning with "invalid" mode.
       val error2 = intercept[IllegalArgumentException] {
